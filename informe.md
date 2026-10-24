@@ -72,6 +72,8 @@ auditoría de representatividad e intervalos de confianza.
 
 **¿Por qué se muestrea si aquí el parámetro existe y se calculó?**
 
+En la práctica profesional real, la población total suele ser inaccesible o demasiado costosa de medir, por lo que este tipo de experimentos permite entender qué diseño es más confiable antes de salir al campo.
+
 
 ### Los tres diseños
 
@@ -90,6 +92,7 @@ auditoría de representatividad e intervalos de confianza.
 | Media (USD) | 1336.00 | 1405.00 | 1235.00 | 1491.00 | 1288.00 |
 
 **P2. ¿Cuánto vale el parámetro poblacional y cuánto estimó cada diseño? ¿Cuál quedó más cerca y por qué eso no alcanza para declarar un ganador?**  
+
 El parámetro poblacional es **1330.72 USD**. Las estimaciones fueron:
 * **Conveniencia:** 1348.50 USD (Dif: +17.78)
 * **Aleatorio Simple (Semilla 1):** 1336.00 USD (Dif: +5.28)
