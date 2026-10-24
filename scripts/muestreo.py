@@ -7,6 +7,7 @@
 #
 # Uso (desde la raíz del repositorio):  python scripts/muestreo.py
 
+from pathlib import Path
 import pandas as pd
 
 pd.set_option("display.width", 100)
@@ -23,7 +24,7 @@ def reporte(nombre, muestra, parametro):
     n = len(muestra)
     media = muestra["ingresos_mensuales"].mean()
     comp = muestra["ciudad"].value_counts().to_dict()
-    print(f"[{nombre}] n={n}  media={media:.2f} USD  "
+    print(f"{nombre} n={n}  media={media:.2f} USD "
           f"(parámetro {parametro:.2f}, diferencia {media - parametro:+.2f})")
     print(f"    composición por ciudad: {comp}")
 
@@ -31,10 +32,11 @@ def reporte(nombre, muestra, parametro):
 # ---------------------------------------------------------------------------
 # 1. La población y su parámetro (N = 400)
 # ---------------------------------------------------------------------------
-# La base de fidelización completa es la población: 400 clientes. El parámetro
-# es el ingreso mensual promedio real (solo calculable porque la población es
-# pequeña y accesible: sirve de espejo para juzgar las muestras).
-poblacion = pd.read_csv("data/clientes_400.csv")
+# Cargar la población desde la ruta dinámicamente respecto a la carpeta del script
+BASE_DIR = Path(__file__).resolve().parent.parent
+RUTA_CSV = BASE_DIR / "data" / "clientes_400.csv"
+
+poblacion = pd.read_csv(RUTA_CSV)
 parametro = poblacion["ingresos_mensuales"].mean()
 print(f"Población: {poblacion.shape[0]} clientes × {poblacion.shape[1]} columnas")
 print(f"Parámetro poblacional — ingreso medio: {parametro:.2f} USD")
@@ -45,30 +47,29 @@ print()
 # 2. Muestra por conveniencia: "los primeros que llegaron"
 # ---------------------------------------------------------------------------
 # TODO 1: toma como muestra las primeras 20 filas de la población.
-#         Pista: .head(20) — igual que la demo de clase.
-#         Después de correrlo, mira la composición por ciudad que imprime el
-#         reporte: ¿es un corte al azar? ¿alguna ciudad falta por completo?
-muestra_conv = None
+muestra_conv = poblacion.head(20)
 
 # ---------------------------------------------------------------------------
 # 3. Muestra aleatoria simple: el sorteo de 20
 # ---------------------------------------------------------------------------
 # TODO 2: sortea 20 clientes con la misma probabilidad para todos (20/400 = 5 %).
-#         Pista: .sample(20, random_state=1). Con random_state el resultado es
-#         reproducible; sin él cambia en cada ejecución.
-# TODO 3: repite el sorteo con las semillas 2 a 5 y anota las 5 medias en el
-#         informe: la variabilidad de la estimación es parte de la lección.
-muestra_aas = None
+muestra_aas = poblacion.sample(20, random_state=1)
+
+# TODO 3: repite el sorteo con las semillas 2 a 5 para evaluar la variabilidad.
+print("--- TODO 3: Variabilidad de la muestra aleatoria simple (Semillas 1 a 5) ---")
+for semilla in range(1, 6):
+    m_temp = poblacion.sample(20, random_state=semilla)
+    media_temp = m_temp["ingresos_mensuales"].mean()
+    print(f"  Semilla {semilla}: Media estimada = {media_temp:.2f} USD (Dif: {media_temp - parametro:+.2f})")
+print("-" * 75 + "\n")
 
 # ---------------------------------------------------------------------------
 # 4. Muestra estratificada: 5 % dentro de cada ciudad
 # ---------------------------------------------------------------------------
-# TODO 4: muestrea dentro de cada ciudad (el estrato), con afijación
-#         proporcional: 5 % de cada una → 10 de Quito, 6 de Guayaquil y 4 de
-#         Cuenca (20 en total).
-#         Pista: .groupby("ciudad") y .sample(frac=0.05, random_state=1).
-#         ¿Qué garantiza este diseño que el sorteo simple no garantiza?
-muestra_est = None
+# TODO 4: muestrea dentro de cada ciudad (el estrato) con afijación proporcional (5 %).
+muestra_est = poblacion.groupby("ciudad", group_keys=False).apply(
+    lambda x: x.sample(frac=0.05, random_state=1)
+)
 
 # ---------------------------------------------------------------------------
 # 5. Comparación final
